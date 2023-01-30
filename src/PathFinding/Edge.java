@@ -19,8 +19,12 @@ public class Edge implements Comparable<Edge> {
     }
     @Override
     public int compareTo(Edge o) {
-        if(startVertices==o.getStartVertices()&&endVertices==o.getEndVertices()){return 0;}
-        else return 1;
+        if((startVertices.equals(o.getStartVertices())&&endVertices.equals(o.getEndVertices()))||
+        (startVertices.equals(o.getEndVertices())&&endVertices.equals(o.getStartVertices()))){return 0;}
+        
+        int value = startVertices.compareTo(o.getStartVertices());
+        if(value!=0){return value;}
+        return 1;
     }
 
 }
