@@ -20,6 +20,13 @@ public class EdgeList {
         Edge edge = new Edge(startV, endV,cost);
         AddEdge(edge);
     }
+    public void DisplayData()
+    {
+        for(Edge e : edges)
+        {
+            System.out.println(e);
+        }
+    }
     private boolean checkHasSameEdgeInList(Edge edge)
     {
         for(Edge e:edges)

@@ -13,6 +13,10 @@ public class Edge implements Comparable<Edge> {
     public String getStartVertices(){return startVertices;}
     public String getEndVertices(){return endVertices;}
     public int getCost(){return cost;}
+    public String toString()
+    {
+        return String.format("(%s,%s,%s)", startVertices,endVertices,Integer.toString(cost));
+    }
     @Override
     public int compareTo(Edge o) {
         if(startVertices==o.getStartVertices()&&endVertices==o.getEndVertices()){return 0;}
