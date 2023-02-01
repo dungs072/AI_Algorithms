@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.Scanner;
 import java.util.Stack;
 
+// 2 class below just only for UCS algorithm
 class PathComparator implements Comparator<Path>
 {
 
@@ -54,6 +55,7 @@ class Path{
   public int getTotalCost(){return totalCost;}
 
 }
+//-----------------------------------------
 
 class Node{
   private Node parent;
@@ -216,6 +218,7 @@ public class App {
     }
   }
 
+  //handle displaying path onto screen and read, write file
   private static void loadDataFromFile(Graph graph) {
     try {
       File myObj = new File("src/InputData.txt");
@@ -291,7 +294,7 @@ public class App {
     displayData(nameAlgo, paths);
     graph.clearParentForAllNodes();
   }
- 
+
   private static void displayOptimalPath(Path path)
   {
     ArrayList<Node> nodes = path.getNodes();
@@ -315,6 +318,8 @@ public class App {
     System.out.print(n);
     writeDataToFile(pathDirect.toString(), nameAlgo);
   }
+  
+  // implement Breadth-first search
   private static boolean BFS(Node start, Node des, Graph graph) {
     if (start == null || des == null) {
       return false;
@@ -339,7 +344,7 @@ public class App {
     }
     return false;
   }
-
+  // implement Depth-first search
   private static boolean DFS(Node start, Node des, Graph graph) {
     if (start == null || des == null) {
       return false;
@@ -364,7 +369,7 @@ public class App {
     }
     return false;
   }
-
+  // implement Depth-limited search
   private static boolean DLS(Node start, Node des, Graph graph, int depthLimit) {
     if (start == null || des == null) {
       return false;
@@ -394,6 +399,7 @@ public class App {
       }
     }
   }
+  //implement Iterative deepening depth-first searc 
   private static int DLS2(Node start, Node des, Graph graph, int depthLimit) {
     if (start == null || des == null) {
       return 0;
@@ -422,6 +428,7 @@ public class App {
     }
     return des.getParent() != null;
   }
+  //implement Uniform-cost search
   private static Path UCS(Node start, Node des, Graph graph)
   {
     if(start==null||des==null){return null;}
