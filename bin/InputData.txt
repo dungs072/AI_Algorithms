@@ -1,4 +1,4 @@
-A,B,C,D,E,F,G,K
+A,B,C,D,E,F,G,K,H,I,Z,M
 (A,B,1)
 (A,C,2)
 (B,D,3)
@@ -7,3 +7,8 @@ A,B,C,D,E,F,G,K
 (C,G,3)
 (E,K,1)
 (B,F,5)
+(G,Z,4)
+(H,I,1)
+(M,K,2)
+(M,Z,1)
+(M,F,4)

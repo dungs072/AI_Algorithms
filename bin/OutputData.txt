@@ -1,0 +1,12 @@
+Start Node: A
+End Node: Z
+Implement FBS
+A->C->G->Z
+Implement DFS
+A->C->G->Z
+Implement DLS
+A->B->F->M->Z
+Implement IDS
+A->C->G->Z
+Implement UCS
+A->C->G->Z

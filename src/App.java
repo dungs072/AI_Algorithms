@@ -1,17 +1,65 @@
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Stack;
 
-class Node {
+class PathComparator implements Comparator<Path>
+{
+
+  @Override
+  public int compare(Path o1, Path o2) {
+    if(o1.getTotalCost()<o2.getTotalCost()){return -1;}
+    if(o1.getTotalCost()>o2.getTotalCost()){return 1;}
+    else return 0;
+  }
+  
+}
+class Path{
+  private ArrayList<Node> nodes;
+  private int totalCost;
+  public Path(int cost)
+  {
+    nodes = new ArrayList<>();
+    totalCost = cost;
+  }
+  public void addNode(Node node)
+  {
+    if(nodes.contains(node)){return;}
+    nodes.add(node);
+  }
+  public void addAlls(ArrayList<Node> nodes)
+  {
+    this.nodes.addAll(nodes);
+  }
+  public void setTotalCost(int cost)
+  {
+    totalCost = cost;
+  }
+  public void addTotalCost(int addValue)
+  {
+    totalCost+=addValue;
+  }
+  public ArrayList<Node> getNodes(){return nodes;}
+  public Node getLastNode(){return nodes.get(nodes.size()-1);}
+  public int getTotalCost(){return totalCost;}
+
+}
+
+class Node{
   private Node parent;
   private String name;
   private LinkedList<Edge> edgeList;
+
 
   public Node(String name) {
     this.name = name;
@@ -21,6 +69,7 @@ class Node {
   public void SetParent(Node node) {
     parent = node;
   }
+
 
   public Node getParent() {
     return parent;
@@ -107,13 +156,13 @@ class Graph {
   public HashSet<Node> getNodes() {
     return nodes;
   }
-  public void clearParentForAllNodes()
-  {
+
+  public void clearParentForAllNodes() {
     for (Node node : nodes) {
-        node.SetParent(null);
-      }
+      node.SetParent(null);
+    }
   }
-  
+
 }
 
 public class App {
@@ -121,27 +170,50 @@ public class App {
     Graph ourGraph = new Graph();
     loadDataFromFile(ourGraph);
     Node start = ourGraph.getNode("A");
-    Node end = ourGraph.getNode("D");
+    Node end = ourGraph.getNode("Z");
+    deleteOldDataInFileOutput(start.getName(),end.getName());
     System.out.println("Implement FBS");
     if (BFS(start, end, ourGraph)) {
-      displayPath(start, end, ourGraph);
+      displayPath(start, end, ourGraph,"Implement FBS");
     } else {
+      displayData("Implement FBS",null );
       System.out.println("Cannot find path !!!!!");
     }
     System.out.println("\nImplement DFS");
     if (DFS(start, end, ourGraph)) {
-      displayPath(start, end, ourGraph);
+      displayPath(start, end, ourGraph,"Implement DFS");
     } else {
+      displayData("Implement DFS",null );
       System.out.println("Cannot find path !!!!!");
     }
 
     System.out.println("\nImplement DLS");
-    if (DLS(start, end, ourGraph,2)) {
-      displayPath(start, end, ourGraph);
+    if (DLS(start, end, ourGraph, 4)) {
+      displayPath(start, end, ourGraph,"Implement DLS");
     } else {
+      displayData("Implement DLS",null );
       System.out.println("Cannot find path !!!!!");
     }
-    // ourGraph.printGraph();
+
+    System.out.println("\nImplement IDS");
+    if (IDS(start, end, ourGraph)) {
+      displayPath(start, end, ourGraph,"Implement IDS");
+    } else {
+      displayData("Implement IDS",null );
+      System.out.println("Cannot find path !!!!!");
+    }
+
+    System.out.println("\nImplement UCS");
+    Path optimalPath = UCS(start,end,ourGraph);
+    if(optimalPath!=null)
+    {
+      displayOptimalPath(optimalPath);
+    }
+    else
+    {
+      displayData("Implement UCS",null );
+      System.out.println("Cannot find path !!!!!");
+    }
   }
 
   private static void loadDataFromFile(Graph graph) {
@@ -170,10 +242,45 @@ public class App {
       e.printStackTrace();
     }
   }
+  private static void writeDataToFile(String path,String nameAlgo)
+  {
+    try {
+      FileWriter myWriter = new FileWriter("src/OutputData.txt",true);
+      myWriter.write(nameAlgo+"\n");
+      myWriter.write(path+"\n");
+      myWriter.close();
+      
+    } catch (IOException e) {
+      System.out.println("An error occurred.");
+      e.printStackTrace();
+    }
+  }
+  private static void deleteOldDataInFileOutput(String startName, String endName)
+  {
+    try {
+      FileWriter myWriter = new FileWriter("src/OutputData.txt");
+      myWriter.write("");
 
-  private static void displayPath(Node start, Node des, Graph graph) {
+      myWriter.close();
+      
+    } catch (IOException e) {
+      System.out.println("An error occurred.");
+      e.printStackTrace();
+    }
+    try {
+      FileWriter myWriter = new FileWriter("src/OutputData.txt",true);
+      myWriter.write("Start Node: "+ startName+"\n");
+      myWriter.write("End Node: "+ endName+"\n");
+      myWriter.close();
+      
+    } catch (IOException e) {
+      System.out.println("An error occurred.");
+      e.printStackTrace();
+    }
+  }
+
+  private static void displayPath(Node start, Node des, Graph graph,String nameAlgo) {
     ArrayList<Node> paths = new ArrayList<Node>();
-
     paths.add(des);
     Node parent = des.getParent();
     while (parent != null) {
@@ -181,12 +288,33 @@ public class App {
       parent = parent.getParent();
     }
     Collections.reverse(paths);
-    for (Node node : paths) {
-      System.out.print(node.getName() + " ");
-    }
+    displayData(nameAlgo, paths);
     graph.clearParentForAllNodes();
   }
+ 
+  private static void displayOptimalPath(Path path)
+  {
+    ArrayList<Node> nodes = path.getNodes();
+    System.out.println("Total cost of optimal path: "+path.getTotalCost());
+    displayData("Implement UCS", nodes);
 
+  }
+  private static void displayData(String nameAlgo, ArrayList<Node> paths) {
+    if(paths==null){
+      writeDataToFile("Cannot find path !!!!", nameAlgo);
+      return;
+    }
+    StringBuilder pathDirect = new StringBuilder();
+    for (int i =0;i<paths.size()-1;i++) {
+      String n = paths.get(i).getName() + "->";
+      pathDirect.append(n);
+      System.out.print(n);
+    }
+    String n = paths.get(paths.size()-1).getName();
+    pathDirect.append(n);
+    System.out.print(n);
+    writeDataToFile(pathDirect.toString(), nameAlgo);
+  }
   private static boolean BFS(Node start, Node des, Graph graph) {
     if (start == null || des == null) {
       return false;
@@ -242,36 +370,86 @@ public class App {
       return false;
     }
     ArrayList<Node> visitedList = new ArrayList<>();
-    Stack<Node> stack = new Stack<Node>();
-    stack.add(start);
-    int depth = 0;
-    while (!stack.isEmpty()) {
-      if (depth <= depthLimit) {
-        Node node = stack.pop();
-        visitedList.add(node);
-        for (Edge edge : node.getEdges()) {
-          Node destVertex = edge.getDestVertex();
-          if (visitedList.contains(destVertex)) {
-            continue;
-          }
-          
-          destVertex.SetParent(node);
-          if (destVertex.equals(des)) {
-            return true;
-          }
-          stack.add(destVertex);
+    int depth = -1;
+    DLSRecusive(start, des, visitedList, depth, depthLimit);
+
+    return des.getParent() != null;
+  }
+
+  private static void DLSRecusive(Node node, Node des, ArrayList<Node> visitedList, int depth, int depthLimit) {
+    depth++;
+    if (depth >= depthLimit) {
+      return;
+    }
+    visitedList.add(node);
+    for (Edge edge : node.getEdges()) {
+      Node destVertex = edge.getDestVertex();
+      if (!visitedList.contains(destVertex)) {
+        destVertex.SetParent(node);
+        if (destVertex.equals(des)) {
+          return;
         }
-        
-        depth++;
+        DLSRecusive(destVertex, des, visitedList, depth, depthLimit);
+
       }
-      else
+    }
+  }
+  private static int DLS2(Node start, Node des, Graph graph, int depthLimit) {
+    if (start == null || des == null) {
+      return 0;
+    }
+    ArrayList<Node> visitedList = new ArrayList<>();
+    int depth = -1;
+    DLSRecusive(start, des, visitedList, depth, depthLimit);
+    
+    return visitedList.size();
+  }
+
+  private static boolean IDS(Node start, Node des, Graph graph) {
+    
+    int depthLimit = 1;
+    int lastLengthVisitedList = 0;
+    int currentLengthVisitedList = 0;
+    while(des.getParent()==null)
+    {
+      currentLengthVisitedList = DLS2(start, des, graph, depthLimit);
+      if(currentLengthVisitedList==lastLengthVisitedList)
       {
-        System.out.println("no paths for depth limit like that :((");
-        return false;
+        break;
+      }
+      lastLengthVisitedList = currentLengthVisitedList;
+      depthLimit++;
+    }
+    return des.getParent() != null;
+  }
+  private static Path UCS(Node start, Node des, Graph graph)
+  {
+    if(start==null||des==null){return null;}
+    ArrayList<Node> visitedList = new ArrayList<>();
+    PriorityQueue<Path> priorityQueue = new PriorityQueue<>(graph.getNodes().size(),new PathComparator());
+    //start node
+    Path startPath = new Path(0);
+    startPath.addNode(start);
+    priorityQueue.add(startPath);
+    while(!priorityQueue.isEmpty())
+    {
+      Path oldPath = priorityQueue.poll();
+      Node lastNode = oldPath.getLastNode();
+      if(lastNode==des){return oldPath;}
+      
+      if(visitedList.contains(lastNode)){continue;}
+      visitedList.add(lastNode);
+      for(Edge edge: lastNode.getEdges())
+      {
+        Path path = new Path(oldPath.getTotalCost());
+        path.addAlls(oldPath.getNodes());
+        path.addNode(edge.getDestVertex());
+        path.addTotalCost(edge.getCost());
+        priorityQueue.add(path);
       }
 
     }
-    return false;
+    return null;
   }
 
 }
